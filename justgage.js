@@ -78,6 +78,10 @@ JustGage = function(config) {
     // number of decimal places for our human friendly number to contain
     humanFriendlyDecimal : (config.humanFriendlyDecimal) ? config.humanFriendlyDecimal : 0,
     
+    // textRenderer: func
+    // function applied before rendering text
+    textRenderer  : (config.textRenderer) ? config.textRenderer : null,
+
     // gaugeWidthScale : float
     // width of the gauge element
     gaugeWidthScale : (config.gaugeWidthScale) ? config.gaugeWidthScale : 1.0,
@@ -423,8 +427,12 @@ JustGage = function(config) {
   this.txtTitle.id = this.config.id+"-txttitle";
   
   // value
-  if( this.config.humanFriendly ) this.originalValue = humanFriendlyNumber( this.originalValue, this.config.humanFriendlyDecimal );
-  this.txtValue = this.canvas.text(this.params.valueX, this.params.valueY, this.originalValue + this.config.symbol);
+  if(this.config.textRenderer)
+    this.originalValue = this.config.textRenderer(this.originalValue);
+  else if( this.config.humanFriendly ) 
+    this.originalValue = humanFriendlyNumber( this.originalValue, this.config.humanFriendlyDecimal ) + this.config.symbol;
+
+  this.txtValue = this.canvas.text(this.params.valueX, this.params.valueY, this.originalValue);
   this.txtValue. attr({
     "font-size":this.params.valueFontSize,
     "font-weight":"bold",
@@ -501,13 +509,18 @@ JustGage.prototype.refresh = function(val) {
   if (val > this.config.max) {val = this.config.max;}
   if (val < this.config.min) {val = this.config.min;}
 
+
   if(!this.config.levelColorsGradient && this.config.levelThresholds.length > 0 && (this.config.levelThresholds.length < this.config.levelColors.length))
     var color = getColorForValue(val,this.config.levelColors,this.config.levelThresholds)
   else
     var color = getColorForPercentage((val - this.config.min) / (this.config.max - this.config.min), this.config.levelColors, this.config.levelColorsGradient);
 
-  if( this.config.humanFriendly ) displayVal = humanFriendlyNumber( displayVal, this.config.humanFriendlyDecimal );
-  this.canvas.getById(this.config.id+"-txtvalue").attr({"text":displayVal + this.config.symbol});
+  if(this.config.textRenderer)
+    displayVal = this.config.textRenderer(displayVal);
+  else if( this.config.humanFriendly ) 
+    displayVal = humanFriendlyNumber( displayVal, this.config.humanFriendlyDecimal ) + this.config.symbol;
+
+  this.canvas.getById(this.config.id+"-txtvalue").attr({"text":displayVal});
   this.canvas.getById(this.config.id+"-level").animate({pki: [val, this.config.min, this.config.max, this.params.widgetW, this.params.widgetH,  this.params.dx, this.params.dy, this.config.gaugeWidthScale, this.config.donut], "fill":color},  this.config.refreshAnimationTime, this.config.refreshAnimationType);
   this.config.value = val;
   originalVal = null;
