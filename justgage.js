@@ -446,7 +446,10 @@ JustGage = function(config) {
   
   // min
   this.txtMinimum = this.config.min;
-  if( this.config.humanFriendly ) this.txtMinimum = humanFriendlyNumber( this.config.min, this.config.humanFriendlyDecimal );
+  if(this.config.textRenderer)
+      this.txtMinimum = this.config.textRenderer(this.config.min);
+  else if( this.config.humanFriendly ) 
+      this.txtMinimum = humanFriendlyNumber( this.config.min, this.config.humanFriendlyDecimal );
   this.txtMin = this.canvas.text(this.params.minX, this.params.minY, this.txtMinimum);
   this.txtMin. attr({
     "font-size":this.params.minFontSize,
@@ -459,7 +462,10 @@ JustGage = function(config) {
   
   // max
   this.txtMaximum = this.config.max;
-  if( this.config.humanFriendly ) this.txtMaximum = humanFriendlyNumber( this.config.max, this.config.humanFriendlyDecimal );
+  if(this.config.textRenderer)
+    this.txtMaximum = this.config.textRenderer(this.config.max);
+  else if( this.config.humanFriendly )
+    this.txtMaximum = humanFriendlyNumber( this.config.max, this.config.humanFriendlyDecimal );
   this.txtMax = this.canvas.text(this.params.maxX, this.params.maxY, this.txtMaximum);
   this.txtMax. attr({
     "font-size":this.params.maxFontSize,
